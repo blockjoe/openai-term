@@ -283,20 +283,29 @@ class OpenAIChatParams(Base):
     logit_bias: Optional[dict[str, confloat(gt=-100, lt=100)]] = None
     user: Optional[str] = None
 
+
 class OpenAIChat(Base):
     created: datetime = Field(default_factory=datetime.now)
     params: OpenAIChatParams
 
     @classmethod
-    def from_file(cls, chat_file: Union[str, Literal["latest"], Literal["oldest"]], data_dir: Optional[str] = None):
+    def from_file(
+        cls,
+        chat_file: Union[str, Literal["latest"], Literal["oldest"]],
+        data_dir: Optional[str] = None,
+    ):
         if chat_file == "latest":
             if not data_dir:
-                raise ValueError("A data_dir must be specified for reading the 'latest' chat file")
+                raise ValueError(
+                    "A data_dir must be specified for reading the 'latest' chat file"
+                )
             chat_file = get_latest_filename("chats", ".chat", data_dir=data_dir)
             chat_file = os.path.join(data_dir, chat_file)
         elif chat_file == "oldest":
             if not data_dir:
-                raise ValueError("A data_dir must be specified for reading the 'oldest' chat file")
+                raise ValueError(
+                    "A data_dir must be specified for reading the 'oldest' chat file"
+                )
             chat_file = get_oldest_filename("chats", ".chat", data_dir=data_dir)
             chat_file = os.path.join(data_dir, chat_file)
 
@@ -319,7 +328,6 @@ class OpenAIChat(Base):
         for msg in self.params.messages:
             yield msg.__rich__()
 
-
     def get_file_contents(self) -> str:
         return self.json(exclude_none=True, by_alias=True)
 
@@ -332,11 +340,12 @@ class OpenAIChat(Base):
         os.makedirs(chat_dir, exist_ok=True)
         return os.path.join(chat_dir, fname + ".chat")
 
-
     def clear(self, data_dir: str):
         os.remove(self.get_filepath(data_dir))
 
-    def persist(self, data_dir: str, overwrites: Optional[Union[str, "OpenAIChat"]] = None):
+    def persist(
+        self, data_dir: str, overwrites: Optional[Union[str, "OpenAIChat"]] = None
+    ):
         file_data = self.get_file_contents()
         fpath = self.get_filepath(data_dir)
         with open(fpath, "w", encoding="utf-8") as j:

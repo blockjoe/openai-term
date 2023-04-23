@@ -15,7 +15,7 @@ from ..models import (
     OpenAIChat,
     OpenAIChatParams,
 )
-from ..history import get_oldest_filename, iter_filenames, iter_filepaths
+from ..history import iter_filepaths
 
 
 class Config(BaseSettings):
@@ -44,8 +44,7 @@ cli_theme = Theme(
 
 
 def terminal_chat_stream(
-    console: Console,
-    chat_params: OpenAIChatParams, quiet: bool = False
+    console: Console, chat_params: OpenAIChatParams, quiet: bool = False
 ) -> NewMessageT:
     new_message: NewMessageT = {"role": "assistant", "content": []}
 
@@ -87,16 +86,67 @@ def terminal_chat_stream(
 
 @app.command("new-chat")
 def cli_chat(
-    prompt: Optional[str] = typer.Option(None, "--prompt", "-p", help="Immediately feed the prompt. If none is given, the user will be prompted for input."),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="Surpress any output with the exception of the next message in the stream."),
-    model: OpenAIChatModelEnum = typer.Option(OpenAIChatModelEnum.gpt_35_turbo, "--model", "-m", help="The OpenAI Chat Model to utilize"),
-    temperature: Optional[float] = typer.Option(None, "--temp", "-t", min=0, max=2.0,  help="The temperature, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]"),
-    top_p: Optional[float] = typer.Option(None, "--top-p", min=0, max=2.0, help="The top_p value, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]"),
-    stop: Optional[str] = typer.Option(None, "--stop", "-s", help="A phrase to stop the chat completion when reached."),
-    max_tokens: Optional[int] = typer.Option(None, "--max-tokens", "-m", help="The maximum amount of tokens to limit the response, no value means no limit."),
-    presence_penalty: Optional[float] = typer.Option(None, "--presence-penalty", "-pp", min=-2.0, max=2.0, help="The presence penalty, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]"),
-    frequency_penalty: Optional[float] = typer.Option(None, "--frequency-penalty", "-fp", min=-2.0, max=2.0, help="The frequency penalty, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]"),
-    user: Optional[str] = typer.Option(None, help="An optional identifier for the individual sending the quieries."),
+    prompt: Optional[str] = typer.Option(
+        None,
+        "--prompt",
+        "-p",
+        help="Immediately feed the prompt. If none is given, the user will be prompted for input.",
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        "-q",
+        help="Surpress any output with the exception of the next message in the stream.",
+    ),
+    model: OpenAIChatModelEnum = typer.Option(
+        OpenAIChatModelEnum.gpt_35_turbo,
+        "--model",
+        "-m",
+        help="The OpenAI Chat Model to utilize",
+    ),
+    temperature: Optional[float] = typer.Option(
+        None,
+        "--temp",
+        "-t",
+        min=0,
+        max=2.0,
+        help="The temperature, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]",
+    ),
+    top_p: Optional[float] = typer.Option(
+        None,
+        "--top-p",
+        min=0,
+        max=2.0,
+        help="The top_p value, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]",
+    ),
+    stop: Optional[str] = typer.Option(
+        None, "--stop", "-s", help="A phrase to stop the chat completion when reached."
+    ),
+    max_tokens: Optional[int] = typer.Option(
+        None,
+        "--max-tokens",
+        "-m",
+        help="The maximum amount of tokens to limit the response, no value means no limit.",
+    ),
+    presence_penalty: Optional[float] = typer.Option(
+        None,
+        "--presence-penalty",
+        "-pp",
+        min=-2.0,
+        max=2.0,
+        help="The presence penalty, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]",
+    ),
+    frequency_penalty: Optional[float] = typer.Option(
+        None,
+        "--frequency-penalty",
+        "-fp",
+        min=-2.0,
+        max=2.0,
+        help="The frequency penalty, see [link]https://platform.openai.com/docs/api-reference/parameter-details[/link]",
+    ),
+    user: Optional[str] = typer.Option(
+        None, help="An optional identifier for the individual sending the quieries."
+    ),
 ):
     """
     Begin a new AI Chat.
@@ -143,7 +193,9 @@ def cli_chat(
     chat_obj.persist(CONF.data_dir)
 
 
-def _load_chat(chat_name: Union[str, Literal["latest"], Literal["oldest"]]) -> OpenAIChat:
+def _load_chat(
+    chat_name: Union[str, Literal["latest"], Literal["oldest"]]
+) -> OpenAIChat:
     if chat_name != "latest" and chat_name != "oldest":
         if not chat_name.endswith(".chat"):
             chat_name += ".chat"
@@ -154,9 +206,24 @@ def _load_chat(chat_name: Union[str, Literal["latest"], Literal["oldest"]]) -> O
 
 @app.command("continue-chat")
 def cli_continue(
-    chat_name: str = typer.Option("latest", "--chat", "-c", help="Either 'latest', 'oldest', or the filename of the chat relative to its storage location."),
-    next_prompt: Optional[str] = typer.Option(None, "--prompt", "-p ", help="Immediately feed the next prompt. If none is given, the user will be prompted for input."),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="Surpress any output with the exception of the next message in the stream."),
+    chat_name: str = typer.Option(
+        "latest",
+        "--chat",
+        "-c",
+        help="Either 'latest', 'oldest', or the filename of the chat relative to its storage location.",
+    ),
+    next_prompt: Optional[str] = typer.Option(
+        None,
+        "--prompt",
+        "-p ",
+        help="Immediately feed the next prompt. If none is given, the user will be prompted for input.",
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        "-q",
+        help="Surpress any output with the exception of the next message in the stream.",
+    ),
 ):
     """
     Continue a previous AI Chat.
@@ -171,7 +238,9 @@ def cli_continue(
         console.print()
         user_prompt = console.input(
             "[user_prompt]user{} > [/user_prompt]".format(
-                "" if chat_obj.params.user is None else "({})".format(chat_obj.params.user)
+                ""
+                if chat_obj.params.user is None
+                else "({})".format(chat_obj.params.user)
             )
         )
         console.print()
@@ -197,9 +266,18 @@ def cli_continue(
 
 @app.command("view-chat")
 def cli_view_chat(
-    chat_name: str = typer.Option("latest", "--chat", "-c", help="Either 'latest', 'oldest', or the filename of the chat relative to its storage location."),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="Force the view of unformatted text"),
-    fzf: bool = typer.Option(False, "--fzf", help="If true, force terminal output for fzf preview"),
+    chat_name: str = typer.Option(
+        "latest",
+        "--chat",
+        "-c",
+        help="Either 'latest', 'oldest', or the filename of the chat relative to its storage location.",
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="Force the view of unformatted text"
+    ),
+    fzf: bool = typer.Option(
+        False, "--fzf", help="If true, force terminal output for fzf preview"
+    ),
 ) -> None:
     """
     Display a previous AI Chat.
@@ -220,10 +298,18 @@ def cli_view_chat(
         chat_obj = _load_chat(chat_name)
         console.print(str(chat_obj) if quiet else chat_obj)
 
+
 @app.command("delete-chat")
 def cli_delete_chat(
-    chat_name: str = typer.Option("latest", "--chat", "-c", help="Either 'latest', 'oldest', or the filename of the chat relative to its storage location."),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="Force the view of unformatted text"),
+    chat_name: str = typer.Option(
+        "latest",
+        "--chat",
+        "-c",
+        help="Either 'latest', 'oldest', or the filename of the chat relative to its storage location.",
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="Force the view of unformatted text"
+    ),
 ) -> None:
     """
     Display a previous AI Chat.
@@ -245,11 +331,18 @@ def cli_delete_chat(
         if not quiet:
             console.print("Removed chat from {}".format(chat_obj.created))
 
+
 @app.command("list-chats")
 def cli_list_chats(
-    absolute: bool = typer.Option(False, "--abs", "-e", help="Expand to the full absolute path"),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="Only display the chat's raw name"),
-    fzf: bool = typer.Option(False, "--fzf", help="If true, force terminal output for fzf preview"),
+    absolute: bool = typer.Option(
+        False, "--abs", "-e", help="Expand to the full absolute path"
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="Only display the chat's raw name"
+    ),
+    fzf: bool = typer.Option(
+        False, "--fzf", help="If true, force terminal output for fzf preview"
+    ),
 ) -> None:
     """
     List all stored AI Chats.
@@ -279,6 +372,7 @@ def cli_list_chats(
 
 def main():
     app()
+
 
 if __name__ == "__main__":
     main()
