@@ -149,18 +149,19 @@ def cli_chat(
     ),
 ):
     """
-    Begin a new AI Chat. See this is in the text!!!!
+    Begin a new AI Chat.
     """
 
     console = Console(theme=cli_theme, width=88)
 
     if prompt is None:
         console.print()
-        user_message = console.input(
+        with console.capture() as capture:
+            console.print(
             "[user_prompt]user{} > [/user_prompt]".format(
                 "" if user is None else "({})".format(user)
-            )
-        )
+            ), end="")
+        user_message = input(capture.get())
         console.print()
     else:
         user_message = prompt
@@ -236,13 +237,15 @@ def cli_continue(
 
     if next_prompt is None:
         console.print()
-        user_prompt = console.input(
+        with console.capture() as capture:
+            console.print(
             "[user_prompt]user{} > [/user_prompt]".format(
                 ""
                 if chat_obj.params.user is None
                 else "({})".format(chat_obj.params.user)
-            )
+            ), end=""
         )
+        user_prompt = input(capture.get())
         console.print()
     else:
         user_prompt = next_prompt
