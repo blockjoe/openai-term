@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "openai>=0.27.4",
         "typer[all]>=0.7.0",
-        "pydantic[dotenv]>=1.10.7",
+        "pydantic[dotenv]==1.10.7",
     ],
     extras_require={
         "dev": ["black"],

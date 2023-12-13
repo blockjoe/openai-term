@@ -149,7 +149,7 @@ def cli_chat(
     ),
 ):
     """
-    Begin a new AI Chat.
+    Begin a new AI Chat. See this is in the text!!!!
     """
 
     console = Console(theme=cli_theme, width=88)

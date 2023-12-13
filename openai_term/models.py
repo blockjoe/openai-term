@@ -15,7 +15,7 @@ from .history import get_latest_filename, get_oldest_filename
 
 class Base(BaseModel):
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class OpenAIModelPermission(Base):
@@ -276,7 +276,7 @@ class OpenAIChatParams(Base):
     messages: list[OpenAIChatCompletionMessage]
     temperature: confloat(gt=0, lt=2) = None
     top_p: confloat(gt=0, lt=1) = None
-    stop: Optional[Union[str, conlist(item_type=str, max_items=4)]] = None
+    stop: Optional[Union[str, conlist(item_type=str)]] = None
     max_tokens: Optional[int] = None
     presence_penalty: confloat(gt=-2, lt=2) = None
     frequency_penalty: confloat(gt=-2, lt=2) = None
