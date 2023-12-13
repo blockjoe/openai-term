@@ -287,7 +287,12 @@ def cli_view_chat(
     """
 
     if fzf:
-        console = Console(theme=cli_theme, width=88, force_terminal=True)
+        width = os.environ.get("FZF_PREVIEW_COLUMNS", 79)
+        try:
+            width = int(width)
+        except ValueError:
+            width = 79
+        console = Console(theme=cli_theme, width=width-1, force_terminal=True)
     else:
         console = Console(theme=cli_theme, width=88)
 
@@ -352,7 +357,12 @@ def cli_list_chats(
     """
 
     if fzf:
-        console = Console(theme=cli_theme, width=88, force_terminal=True)
+        width = os.environ.get("FZF_PREVIEW_COLUMNS", 79)
+        try:
+            width = int(width)
+        except ValueError:
+            width = 79
+        console = Console(theme=cli_theme, width=width-1, force_terminal=True)
         console.print("Begin New Chat")
     else:
         console = Console(theme=cli_theme, width=88)
